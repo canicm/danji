@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -6,421 +6,442 @@
 <title>침투율 저조 단지 영업관리</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Noto Sans KR', sans-serif; background: #f0f4f8; color: #333; min-height: 100vh; }
-  
-  /* 헤더 */
-  .header {
-    background: linear-gradient(135deg, #1a73e8, #0d47a1);
-    color: white;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header h1 { font-size: 17px; font-weight: 700; }
-  .back-btn {
-    background: rgba(255,255,255,0.2);
-    border: none;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    display: none;
-  }
-  .back-btn:hover { background: rgba(255,255,255,0.3); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; color: #333; min-height: 100vh; }
 
-  /* 화면 전환 */
-  .screen { display: none; padding: 20px; max-width: 800px; margin: 0 auto; }
-  .screen.active { display: block; }
+.header {
+  background: linear-gradient(135deg, #1a73e8, #0d47a1);
+  color: white;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header h1 { font-size: 16px; font-weight: 700; flex: 1; }
+.back-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: none;
+  white-space: nowrap;
+}
+.back-btn:hover { background: rgba(255,255,255,0.35); }
 
-  /* 카드 */
-  .card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
-  .card h2 { font-size: 16px; color: #1a73e8; margin-bottom: 16px; font-weight: 700; }
+.screen { display: none; padding: 16px; max-width: 860px; margin: 0 auto; }
+.screen.active { display: block; }
 
-  /* 선택 버튼 그룹 */
-  .select-group { margin-bottom: 20px; }
-  .select-group label { display: block; font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 600; }
-  .btn-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 10px;
-  }
-  .select-btn {
-    padding: 12px 10px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    background: white;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    color: #444;
-    transition: all 0.2s;
-    text-align: center;
-  }
-  .select-btn:hover { border-color: #1a73e8; color: #1a73e8; background: #e8f0fe; }
-  .select-btn.active { border-color: #1a73e8; background: #1a73e8; color: white; }
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.card h2 { font-size: 15px; color: #1a73e8; margin-bottom: 14px; font-weight: 700; }
 
-  /* 진행 버튼 */
-  .proceed-btn {
-    width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #1a73e8, #0d47a1);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: opacity 0.2s;
-  }
-  .proceed-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .proceed-btn:not(:disabled):hover { opacity: 0.9; }
+.btn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 9px;
+}
+.sel-btn {
+  padding: 11px 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 9px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  transition: all 0.18s;
+  text-align: center;
+  line-height: 1.3;
+}
+.sel-btn:hover { border-color: #1a73e8; color: #1a73e8; background: #e8f0fe; }
+.sel-btn.active { border-color: #1a73e8; background: #1a73e8; color: white; }
 
-  /* 선택 정보 표시 */
-  .selected-info {
-    background: #e8f0fe;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 13px;
-    color: #1a73e8;
-    font-weight: 600;
-    margin-bottom: 16px;
-  }
+.proceed-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #1a73e8, #0d47a1);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: opacity 0.2s;
+}
+.proceed-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+.proceed-btn:not(:disabled):hover { opacity: 0.88; }
 
-  /* 단지 테이블 */
-  .complex-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .complex-table th {
-    background: #f8f9fa;
-    padding: 10px 8px;
-    text-align: center;
-    font-weight: 700;
-    color: #555;
-    border-bottom: 2px solid #e0e0e0;
-    white-space: nowrap;
-  }
-  .complex-table td {
-    padding: 10px 8px;
-    border-bottom: 1px solid #f0f0f0;
-    vertical-align: middle;
-  }
-  .complex-table tr:hover td { background: #fafbff; }
-  .complex-table tr.saved td { background: #f0fff4; }
+.selected-info {
+  background: #e8f0fe;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #1a73e8;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
 
-  /* 건물코드 */
-  .building-code { font-size: 11px; color: #999; font-family: monospace; }
-  .building-name { font-weight: 600; color: #333; }
-  .household { text-align: center; font-weight: 600; color: #1a73e8; }
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.stat-item {
+  background: white;
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.stat-val { font-size: 19px; font-weight: 700; color: #1a73e8; }
+.stat-label { font-size: 11px; color: #888; margin-top: 2px; }
 
-  /* 날짜 버튼 */
-  .date-btn {
-    padding: 6px 10px;
-    border: 1.5px solid #1a73e8;
-    border-radius: 6px;
-    background: white;
-    color: #1a73e8;
-    font-size: 12px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s;
-    min-width: 90px;
-  }
-  .date-btn:hover { background: #1a73e8; color: white; }
-  .date-btn.has-date { background: #e8f0fe; border-color: #1a73e8; }
+.search-box {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 9px;
+  font-size: 14px;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+}
+.search-box:focus { outline: none; border-color: #1a73e8; }
 
-  /* 실적 입력 */
-  .result-input {
-    width: 52px;
-    padding: 6px 4px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 6px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 600;
-    transition: border-color 0.2s;
-  }
-  .result-input:focus { outline: none; border-color: #1a73e8; }
+.table-wrapper { overflow-x: auto; }
+.complex-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 620px; }
+.complex-table th {
+  background: #f8f9fa;
+  padding: 9px 7px;
+  text-align: center;
+  font-weight: 700;
+  color: #555;
+  border-bottom: 2px solid #e0e0e0;
+  white-space: nowrap;
+}
+.complex-table td {
+  padding: 9px 7px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+.complex-table tr:hover td { background: #fafbff; }
+.complex-table tr.row-saved td { background: #f0fff4; }
 
-  /* 저장 버튼 */
-  .save-btn {
-    padding: 6px 12px;
-    background: #34a853;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    white-space: nowrap;
-  }
-  .save-btn:hover { opacity: 0.85; }
-  .save-btn.saving { opacity: 0.6; cursor: not-allowed; }
+.bld-name { font-weight: 600; color: #222; font-size: 13px; }
+.bld-code { font-size: 10px; color: #aaa; font-family: monospace; margin-top: 2px; }
+.hh-count { text-align: center; font-weight: 700; color: #1a73e8; }
 
-  /* 저장 완료 뱃지 */
-  .saved-badge {
-    display: inline-block;
-    padding: 3px 8px;
-    background: #34a853;
-    color: white;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 600;
-  }
+.date-btn {
+  padding: 5px 8px;
+  border: 1.5px solid #1a73e8;
+  border-radius: 6px;
+  background: white;
+  color: #1a73e8;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s;
+  min-width: 82px;
+  display: block;
+  text-align: center;
+}
+.date-btn:hover { background: #1a73e8; color: white; }
+.date-btn.has-date { background: #e8f0fe; }
 
-  /* 달력 팝업 */
-  .calendar-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-  }
-  .calendar-overlay.show { display: flex; }
-  .calendar-popup {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    width: 320px;
-    max-width: 95vw;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-  }
-  .cal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .cal-header h3 { font-size: 16px; font-weight: 700; color: #333; }
-  .cal-nav {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #1a73e8;
-    padding: 4px 8px;
-    border-radius: 6px;
-  }
-  .cal-nav:hover { background: #e8f0fe; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-  .cal-day-header {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 700;
-    color: #666;
-    padding: 4px 0;
-  }
-  .cal-day-header:first-child { color: #e53935; }
-  .cal-day-header:last-child { color: #1a73e8; }
-  .cal-day {
-    text-align: center;
-    padding: 8px 4px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.15s;
-  }
-  .cal-day:hover:not(.empty):not(.other-month) { background: #e8f0fe; color: #1a73e8; }
-  .cal-day.today { background: #fff3e0; color: #f57c00; font-weight: 700; }
-  .cal-day.selected { background: #1a73e8; color: white; font-weight: 700; }
-  .cal-day.empty, .cal-day.other-month { color: #ccc; cursor: default; }
-  .cal-day.sunday { color: #e53935; }
-  .cal-day.saturday { color: #1a73e8; }
-  .cal-day.selected.sunday, .cal-day.selected.saturday { color: white; }
-  .cal-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-  }
-  .cal-cancel {
-    flex: 1;
-    padding: 10px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 8px;
-    background: white;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    color: #666;
-  }
-  .cal-confirm {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    background: #1a73e8;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 700;
-  }
-  .cal-confirm:hover { opacity: 0.9; }
+.num-input {
+  width: 50px;
+  padding: 5px 3px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 0.2s;
+}
+.num-input:focus { outline: none; border-color: #1a73e8; }
 
-  /* 로딩 */
-  .loading {
-    text-align: center;
-    padding: 40px;
-    color: #999;
-    font-size: 14px;
-  }
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid #e0e0e0;
-    border-top-color: #1a73e8;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 12px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* 메모 버튼 */
+.memo-btn {
+  padding: 5px 8px;
+  border: 1.5px solid #f57c00;
+  border-radius: 6px;
+  background: white;
+  color: #f57c00;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s;
+  display: block;
+  text-align: center;
+  min-width: 52px;
+}
+.memo-btn:hover { background: #fff3e0; }
+.memo-btn.has-memo { background: #fff3e0; border-color: #f57c00; font-weight: 700; }
 
-  /* 토스트 */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #333;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 24px;
-    font-size: 14px;
-    font-weight: 600;
-    z-index: 9999;
-    transition: transform 0.3s ease;
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.success { background: #34a853; }
-  .toast.error { background: #ea4335; }
+.save-btn {
+  padding: 6px 11px;
+  background: #34a853;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.18s;
+  white-space: nowrap;
+  display: block;
+}
+.save-btn:hover { opacity: 0.82; }
+.save-btn.saving { opacity: 0.55; cursor: not-allowed; }
 
-  /* 반응형 */
-  @media (max-width: 600px) {
-    .screen { padding: 12px; }
-    .btn-grid { grid-template-columns: repeat(2, 1fr); }
-    .complex-table { font-size: 12px; }
-    .result-input { width: 44px; font-size: 12px; }
-    .date-btn { min-width: 80px; font-size: 11px; padding: 5px 6px; }
-    .complex-table th, .complex-table td { padding: 8px 4px; }
-  }
+/* 달력 오버레이 */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.48);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+}
+.overlay.show { display: flex; }
 
-  /* 통계 바 */
-  .stats-bar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-  .stat-item {
-    background: white;
-    border-radius: 10px;
-    padding: 10px 16px;
-    flex: 1;
-    min-width: 80px;
-    text-align: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-  }
-  .stat-item .stat-val { font-size: 20px; font-weight: 700; color: #1a73e8; }
-  .stat-item .stat-label { font-size: 11px; color: #888; margin-top: 2px; }
+.cal-popup {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  width: 310px;
+  max-width: 95vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+}
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.cal-head h3 { font-size: 15px; font-weight: 700; }
+.cal-nav {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #1a73e8;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.cal-nav:hover { background: #e8f0fe; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-dh {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #666;
+  padding: 4px 0;
+}
+.cal-dh:first-child { color: #e53935; }
+.cal-dh:last-child { color: #1565c0; }
+.cal-d {
+  text-align: center;
+  padding: 7px 3px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.13s;
+}
+.cal-d:hover:not(.empty) { background: #e8f0fe; color: #1a73e8; }
+.cal-d.empty { visibility: hidden; }
+.cal-d.today { background: #fff3e0; color: #f57c00; font-weight: 700; }
+.cal-d.sel { background: #1a73e8 !important; color: white !important; font-weight: 700; }
+.cal-d.sun { color: #e53935; }
+.cal-d.sat { color: #1565c0; }
+.cal-actions { display: flex; gap: 9px; margin-top: 14px; }
+.cal-cancel {
+  flex: 1; padding: 10px; border: 1.5px solid #e0e0e0;
+  border-radius: 8px; background: white; cursor: pointer;
+  font-size: 14px; font-weight: 600; color: #666;
+}
+.cal-confirm {
+  flex: 1; padding: 10px; border: none;
+  border-radius: 8px; background: #1a73e8; color: white;
+  cursor: pointer; font-size: 14px; font-weight: 700;
+}
+.cal-confirm:hover { opacity: 0.88; }
 
-  /* 검색 */
-  .search-box {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 14px;
-    margin-bottom: 16px;
-    transition: border-color 0.2s;
-  }
-  .search-box:focus { outline: none; border-color: #1a73e8; }
+/* 메모 팝업 */
+.memo-popup {
+  background: white;
+  border-radius: 16px;
+  padding: 22px;
+  width: 340px;
+  max-width: 95vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+}
+.memo-popup h3 { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 6px; }
+.memo-popup .memo-sub { font-size: 12px; color: #999; margin-bottom: 12px; }
+.memo-textarea {
+  width: 100%;
+  height: 130px;
+  padding: 10px 12px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 9px;
+  font-size: 13px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color 0.2s;
+}
+.memo-textarea:focus { outline: none; border-color: #f57c00; }
+.memo-char { font-size: 11px; color: #bbb; text-align: right; margin-top: 4px; margin-bottom: 12px; }
+.memo-actions { display: flex; gap: 9px; }
+.memo-cancel {
+  flex: 1; padding: 10px; border: 1.5px solid #e0e0e0;
+  border-radius: 8px; background: white; cursor: pointer;
+  font-size: 14px; font-weight: 600; color: #666;
+}
+.memo-save {
+  flex: 2; padding: 10px; border: none;
+  border-radius: 8px; background: #f57c00; color: white;
+  cursor: pointer; font-size: 14px; font-weight: 700;
+}
+.memo-save:hover { opacity: 0.88; }
 
-  /* 테이블 래퍼 */
-  .table-wrapper { overflow-x: auto; }
+/* 토스트 */
+.toast {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%) translateY(70px);
+  background: #333;
+  color: white;
+  padding: 11px 22px;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 9999;
+  transition: transform 0.28s ease;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.ok { background: #34a853; }
+.toast.err { background: #ea4335; }
+
+/* 로딩 */
+.loading-row td {
+  text-align: center;
+  padding: 30px;
+  color: #aaa;
+  font-size: 13px;
+}
+.spinner {
+  width: 28px; height: 28px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #1a73e8;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  margin: 0 auto 10px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 560px) {
+  .screen { padding: 10px; }
+  .btn-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  .stat-val { font-size: 16px; }
+  .complex-table { font-size: 12px; }
+  .num-input { width: 42px; }
+}
 </style>
 </head>
 <body>
 
-<!-- 헤더 -->
 <div class="header">
   <button class="back-btn" id="backBtn" onclick="goBack()">← 뒤로</button>
   <h1 id="headerTitle">📡 침투율 저조 단지 영업관리</h1>
 </div>
 
-<!-- 화면 1: 대리점/매장 선택 -->
+<!-- 화면1: 대리점/매장 선택 -->
 <div class="screen active" id="screen1">
   <div class="card">
     <h2>🏢 대리점 선택</h2>
-    <div class="select-group">
-      <div class="btn-grid" id="agencyGrid"></div>
-    </div>
+    <div class="btn-grid" id="agencyGrid"></div>
   </div>
   <div class="card" id="storeCard" style="display:none;">
     <h2>🏪 매장 선택</h2>
-    <div class="select-group">
-      <div class="btn-grid" id="storeGrid"></div>
-    </div>
+    <div class="btn-grid" id="storeGrid"></div>
   </div>
   <button class="proceed-btn" id="proceedBtn" disabled onclick="goToScreen2()">
     영업 현황 입력하기 →
   </button>
 </div>
 
-<!-- 화면 2: 단지별 영업 입력 -->
+<!-- 화면2: 단지 입력 -->
 <div class="screen" id="screen2">
-  <div class="selected-info" id="selectedInfo"></div>
-  
+  <div class="selected-info" id="selInfo"></div>
   <div class="stats-bar" id="statsBar"></div>
-
-  <input type="text" class="search-box" placeholder="🔍 건물명 검색..." id="searchBox" oninput="filterTable()">
-
-  <div class="card">
+  <input type="text" class="search-box" id="searchBox" placeholder="🔍 건물명 검색..." oninput="filterTable()">
+  <div class="card" style="padding:12px;">
     <div class="table-wrapper">
-      <table class="complex-table" id="complexTable">
+      <table class="complex-table">
         <thead>
           <tr>
-            <th>건물명</th>
+            <th style="text-align:left;">건물명</th>
             <th>세대수</th>
             <th>영업일정</th>
             <th>단골</th>
             <th>초고속</th>
             <th>TV</th>
+            <th>메모</th>
             <th>저장</th>
           </tr>
         </thead>
-        <tbody id="complexTbody"></tbody>
+        <tbody id="tbody"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- 달력 팝업 -->
-<div class="calendar-overlay" id="calendarOverlay" onclick="closeCalendarOnOverlay(event)">
-  <div class="calendar-popup">
-    <div class="cal-header">
-      <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+<!-- 달력 오버레이 -->
+<div class="overlay" id="calOverlay" onclick="calOverlayClick(event)">
+  <div class="cal-popup">
+    <div class="cal-head">
+      <button class="cal-nav" onclick="calMove(-1)">‹</button>
       <h3 id="calTitle"></h3>
-      <button class="cal-nav" onclick="changeMonth(1)">›</button>
+      <button class="cal-nav" onclick="calMove(1)">›</button>
     </div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-actions">
-      <button class="cal-cancel" onclick="closeCalendar()">취소</button>
-      <button class="cal-confirm" onclick="confirmDate()">확인</button>
+      <button class="cal-cancel" onclick="closeCal()">취소</button>
+      <button class="cal-confirm" onclick="confirmCal()">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 메모 오버레이 -->
+<div class="overlay" id="memoOverlay" onclick="memoOverlayClick(event)">
+  <div class="memo-popup">
+    <h3 id="memoTitle">메모</h3>
+    <div class="memo-sub" id="memoSub"></div>
+    <textarea class="memo-textarea" id="memoText" placeholder="메모를 입력하세요..." maxlength="500" oninput="updateMemoChar()"></textarea>
+    <div class="memo-char"><span id="memoChar">0</span>/500</div>
+    <div class="memo-actions">
+      <button class="memo-cancel" onclick="closeMemo()">취소</button>
+      <button class="memo-save" onclick="saveMemo()">💾 저장</button>
     </div>
   </div>
 </div>
@@ -429,284 +450,270 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ==================== Supabase 초기화 ====================
-const SUPABASE_URL = 'https://nevivoegbvjcerqfqxdm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldml2b2VnYnZqY2VycWZxeGRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxODY1OTEsImV4cCI6MjA5MTc2MjU5MX0._jbIaQpXko1JAZue8fyFGveFVD7gLDkCmz0EhJOIrvM';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ===== Supabase =====
+const { createClient } = supabase;
+const sb = createClient(
+  'https://nevivoegbvjcerqfqxdm.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldml2b2VnYnZqY2VycWZxeGRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxODY1OTEsImV4cCI6MjA5MTc2MjU5MX0._jbIaQpXko1JAZue8fyFGveFVD7gLDkCmz0EhJOIrvM'
+);
 
-// ==================== 데이터 ====================
-const RAW_DATA = [
-  ['JS대리점 인제점','A10135580000000','용인아파트',48],
-  ['JS대리점 인제점','A10158220000000','신산미화아파트',50],
-  ['JS대리점 인제점','A10490530000000','현원아트빌',36],
-  ['JS대리점 인제점','A62237260000000','가나다주택',14],
-  ['JS대리점 인제점','A62237670000000','서반일도빌라',15],
-  ['JS대리점 인제점','A62237690000000','한사랑빌라',11],
-  ['JS대리점 인제점','A62238240000000','아산빌라',19],
-  ['JS대리점 인제점','A62238430000000','이화맨션',16],
-  ['JS대리점 인제점','A62238590000000','운학빌라',11],
-  ['JS대리점 인제점','A62240130000000','영보맨션',15],
-  ['JS대리점 인제점','D42998100000000','N/A',10],
-  ['JS대리점 인제점','D75377880000000','N/A',10],
-  ['JS대리점 인제점','T50110102004550','N/A',10],
-  ['스마일대리점 남녕점','A10169210000000','동남아파트',74],
-  ['스마일대리점 남녕점','A10181730000000','연동이화아파트',64],
-  ['스마일대리점 남녕점','A10220450000000','일품아파트',45],
-  ['스마일대리점 남녕점','A11013840000000','연동아파트',46],
-  ['스마일대리점 남녕점','A12281010000000','원화하이츠빌라',11],
-  ['스마일대리점 남녕점','A62251810000000','제주이화오피스텔',108],
-  ['스마일대리점 남녕점','A62252790000000','신아빌라',12],
-  ['스마일대리점 남녕점','A62253090000000','찬양주택',18],
-  ['스마일대리점 남녕점','A62254240000000','대성빌라트',15],
-  ['스마일대리점 남녕점','A62254590000000','미광빌',12],
-  ['스마일대리점 남녕점','A62257310000000','도두남양빌',19],
-  ['스마일대리점 남녕점','A62264130000000','동양빌라',18],
-  ['스마일대리점 남녕점','A62264270000000','삼미빌라',16],
-  ['스마일대리점 남녕점','A62264990000000','가나빌라',16],
-  ['스마일대리점 남녕점','A70058000000000','산세의아침',17],
-  ['스마일대리점 남녕점','A70296670000000','노꼬메하우스',25],
-  ['스마일대리점 남녕점','D62064190000000','엔알누리8차',16],
-  ['스마일대리점 남녕점','T50130320128918','N/A',28],
-  ['스마일대리점 동홍점','A10134310000000','일호2차아파트',45],
-  ['스마일대리점 동홍점','A10134320000000','주공아파트1차',310],
-  ['스마일대리점 동홍점','A10134360000000','주공아파트2차',302],
-  ['스마일대리점 동홍점','A10134460000000','주공아파트3차',400],
-  ['스마일대리점 동홍점','A10134530000000','주공아파트4차',320],
-  ['스마일대리점 동홍점','A10151440000000','세기아파트',170],
-  ['스마일대리점 동홍점','A10171940000000','세기2차아파트',45],
-  ['스마일대리점 동홍점','A10186310000000','한라빌라',20],
-  ['스마일대리점 동홍점','A10971220000000','남양맨숀아파트',40],
-  ['스마일대리점 동홍점','A10971230000000','충암아파트',10],
-  ['스마일대리점 동홍점','A10971240000000','충암뉴빌라6차',15],
-  ['스마일대리점 동홍점','A50041100000000','금강라이프빌2차',19],
-  ['스마일대리점 동홍점','A50078680000000','모다드림아파트',28],
-  ['스마일대리점 동홍점','A62268930000000','충암뉴빌라',16],
-  ['스마일대리점 동홍점','A62269910000000','남양주택',10],
-  ['스마일대리점 동홍점','A62269930000000','남양주택',28],
-  ['스마일대리점 동홍점','A62270020000000','보림주택',11],
-  ['스마일대리점 동홍점','D43532170000000','그레이빌',18],
-  ['스마일대리점 동홍점','D50191320000000','무지개원룸',19],
-  ['스마일대리점 동홍점','D55080550000000','진영원룸',12],
-  ['스마일대리점 동홍점','D55132330000000','N/A',14],
-  ['스마일대리점 동홍점','T50130320113717','노블레스',80],
-  ['스마일대리점 동홍점','T50130320443882','아름빌',16],
-  ['스마일대리점 동홍점','T50130321172549','예서두레라움2단지',64],
-  ['스마일대리점 삼화점','A11924560000000','미듬하나로맨션',14],
-  ['스마일대리점 삼화점','T50130320091912','삼화LH3단지',850],
-  ['스마일대리점 삼화점','T50130321139685','도련어울림',42],
-  ['스마일대리점 삼화점','T50130321154745','도련블루핀아파트',90],
-  ['스마일대리점 삼화점','T50130321225839','도련영도갤럭시타운2차',113],
-  ['제주E&T대리점 노형점','A11013830000001','세방아파트',56],
-  ['제주E&T대리점 노형점','A11013830000003','세방아파트',20],
-  ['제주E&T대리점 노형점','A11014920000000','지산11차위더스빌',14],
-  ['제주E&T대리점 노형점','A62254740000000','고사마루주택',19],
-  ['제주E&T대리점 노형점','A62254850000000','노형삼다연립주택',16],
-  ['제주E&T대리점 노형점','A62254910000000','정우빌라',11],
-  ['제주E&T대리점 노형점','A70058090000000','노형미듬아뜨리에',12],
-  ['제주E&T대리점 노형점','A70099840000000','스페이스3',12],
-  ['제주E&T대리점 노형점','D43164380000000','N/A',11],
-  ['제주E&T대리점 노형점','D43165600000000','N/A',11],
-  ['제주E&T대리점 노형점','E16312970000000','디아망',21],
-  ['제주E&T대리점 노형점','T50130320060455','다담빌리지',104],
-  ['제주E&T대리점 노형점','T50130320072682','해듬빌',12],
-  ['제주E&T대리점 노형점','T50130320099629','창신주택',12],
-  ['제주E&T대리점 노형점','T50130320195258','노형휴먼빌',40],
-  ['제주E&T대리점 노형점','T50130320203907','N/A',50],
-  ['제주E&T대리점 도남점','A10135280000000','아산5차아파트',28],
-  ['제주E&T대리점 도남점','A10163170000000','신일아파트',32],
-  ['제주E&T대리점 도남점','A10167380000000','대원맨션',20],
-  ['제주E&T대리점 도남점','A10217960000000','고덕쉐르빌',19],
-  ['제주E&T대리점 도남점','A10228000000000','덕진유니스아파트',18],
-  ['제주E&T대리점 도남점','A12021150000000','도남시영아파트',65],
-  ['제주E&T대리점 도남점','A12021170000000','성환아파트',189],
-  ['제주E&T대리점 도남점','A12021180000000','수선화아파트',95],
-  ['제주E&T대리점 도남점','A12021200000000','수선화아파트',49],
-  ['제주E&T대리점 도남점','A12573340000000','도남위더스빌',14],
-  ['제주E&T대리점 도남점','A62258010000000','효신빌라',18],
-  ['제주E&T대리점 도남점','A62258060000000','이세원룸',18],
-  ['제주E&T대리점 도남점','A62258070000000','도남원룸',10],
-  ['제주E&T대리점 도남점','A62258650000000','원빌라',11],
-  ['제주E&T대리점 도남점','A62258950000000','윤재연립',13],
-  ['제주E&T대리점 도남점','A62258970000000','청암연립',21],
-  ['제주E&T대리점 도남점','A70303340000000','화안빌',27],
-  ['제주E&T대리점 도남점','D43182230000000','N/A',10],
-  ['제주E&T대리점 도남점','E16293820000000','신화위더스빌29차',32],
-  ['제주E&T대리점 도남점','T50110129000850','JNC4차아파트',52],
-  ['제주E&T대리점 도남점','T50130320040105','재영샤르빌',21],
-  ['제주E&T대리점 도남점','T50130320097743','대동베르빌',24],
-  ['제주E&T대리점 삼화점','A10192000000000','한라하이츠빌',13],
-  ['제주E&T대리점 삼화점','A50014260000000','제주삼화휴먼시아1단지아파트',1364],
-  ['제주E&T대리점 삼화점','A62250020000000','무지개하우스',15],
-  ['제주E&T대리점 삼화점','A70008410000000','바다그린빌',20],
-  ['제주E&T대리점 삼화점','D43115980000000','N/A',11],
-  ['제주E&T대리점 삼화점','T50110114000456','삼우주택',10],
-  ['제주E&T대리점 삼화점','T50110114000754','N/A',10],
-  ['제주E&T대리점 삼화점','T50130320040392','네오하임A동',18],
-  ['제주E&T대리점 삼화점','T50130320230694','N/A',18],
-  ['제주E&T대리점 삼화점','T50130320994443','N/A',10],
-  ['제주E&T대리점 시청점','A11030370000000','대유맨션',19],
-  ['제주E&T대리점 시청점','A62240880000000','보성주택',12],
-  ['제주E&T대리점 시청점','A62242160000000','동훈빌라',12],
-  ['제주E&T대리점 시청점','D43030570000000','N/A',10],
-  ['제주E&T대리점 시청점','D62068010000000','N/A',12],
-  ['제주광양대리점 삼화점','T50130320219731','천마에코피아',44],
-  ['제주광양대리점 삼화점','T50130321238652','봉개뜨래별2차',29],
-  ['제주광양대리점 서부점','A50014240000004','제주고성휴먼시아아파트',208],
-  ['제주광양대리점 서부점','A50014240000008','제주고성휴먼시아아파트',48],
-  ['제주광양대리점 서부점','A62266430000000','상귀반석타운',48],
-  ['제주광양대리점 아라점','A62250850000000','푸른원룸',12],
-  ['제주광양대리점 아라점','A70056740000000','이도나이스빌',16],
-  ['제주광양대리점 아라점','A80277630000000','노블리츠빌',40],
-  ['제주광양대리점 아라점','E16288990000000','아라마루',60],
-  ['제주광양대리점 아라점','T50130320087118','장안미르빌',30],
-  ['제주광양대리점 아라점','T50130320162494','아라마루N',60],
-  ['제주광양대리점 아라점','T50130320250824','아라휴안8차',24],
-  ['제주광양대리점 아라점','T50130320310426','N/A',10],
-  ['제주광양대리점 아라점','T50130321069385','아라루체빌2차',16],
-  ['제주굿모닝대리점 동우점','T50130321016881','벽강하이본타워8차',81],
-  ['제주굿모닝대리점 서문점','A10177080000000','청암용담연립',33],
-  ['제주굿모닝대리점 서문점','A10220660000000','한라아파트',49],
-  ['제주굿모닝대리점 서문점','A10451090000000','보성아파트',35],
-  ['제주굿모닝대리점 서문점','A11040440000000','세흥빌라',19],
-  ['제주굿모닝대리점 서문점','A40003210000000','진이빌',16],
-  ['제주굿모닝대리점 서문점','A62246320000000','동룡주택',48],
-  ['제주굿모닝대리점 서문점','A62246830000000','진영빌라',10],
-  ['제주굿모닝대리점 서문점','A62247100000000','상고지빌라',19],
-  ['제주굿모닝대리점 서문점','A62247140000000','삼보빌라',15],
-  ['제주굿모닝대리점 서문점','A62247170000000','제니스빌라',16],
-  ['제주굿모닝대리점 서문점','A70303420000000','광덕맨션',12],
-  ['제주굿모닝대리점 서문점','T50130320201974','용두암1차현대아파트',266],
-  ['제주굿모닝대리점 성산점','A10164830000000','고성진우파크빌',115],
-  ['제주굿모닝대리점 성산점','A11435670000000','동명아파트',79],
-  ['제주굿모닝대리점 성산점','T50130320802466','서귀포성산LH행복주택',346],
-  ['제주굿모닝대리점 연동점','A10464600000000','연동한양아트빌',15],
-  ['제주굿모닝대리점 연동점','A11898370000000','제동골든빌',18],
-  ['제주굿모닝대리점 연동점','A11898390000000','삼진빌라트',10],
-  ['제주굿모닝대리점 연동점','A62261450000000','쉐르빌',18],
-  ['제주굿모닝대리점 연동점','A70058340000000','민트하우스',43],
-  ['제주굿모닝대리점 연동점','A70153810000000','비산쉐르빌',16],
-  ['제주굿모닝대리점 연동점','D43206560000000','가나아파트',40],
-  ['제주굿모닝대리점 연동점','E16360990000000','연동중흥S-클래스',183],
-  ['제주굿모닝대리점 연동점','T50110137001412','미도스카이빌',120],
-  ['제주굿모닝대리점 연동점','T50130320088460','고운힐타운아파트I',80],
-  ['제주굿모닝대리점 이도점','A62250970000000','아라빌',12],
-  ['제주굿모닝대리점 이도점','A70056050000000','정원파인즈빌3차',16],
-  ['제주굿모닝대리점 이도점','D50174520000000','파크빌',16],
-  ['제주굿모닝대리점 이도점','E25298400000000','블루마운틴',16],
-  ['제주굿모닝대리점 이도점','T50130320117767','휴온스테이아라빌라',30],
-  ['제주굿모닝대리점 이도점','T50130320322033','화인퍼스트빌8차',100],
-  ['제주굿모닝대리점 이도점','T50130320997624','메종드파인13차',16],
-  ['제주굿모닝대리점 해피점','A10228660000000','재형파크빌',18],
-  ['제주굿모닝대리점 해피점','A11013850000000','영보아파트',16],
-  ['제주굿모닝대리점 해피점','A12639540000000','송우수자인아파트',26],
-  ['제주굿모닝대리점 해피점','A62251650000000','에이스텔',100],
-  ['제주굿모닝대리점 해피점','A62251660000000','이레하이텔',122],
-  ['제주굿모닝대리점 해피점','A62251680000000','메르헨하우스III',466],
-  ['제주굿모닝대리점 해피점','A62251970000000','서림빌라',16],
-  ['제주굿모닝대리점 해피점','A62251990000000','카리스빌',19],
-  ['제주굿모닝대리점 해피점','A62252170000000','대복빌라',14],
-  ['제주굿모닝대리점 해피점','A62252490000000','정한오피스텔',154],
-  ['제주굿모닝대리점 해피점','A62257010000000','창우빌라',22],
-  ['제주굿모닝대리점 해피점','A62257080000000','이호빌라',12],
-  ['제주굿모닝대리점 해피점','A62257150000000','남양주택',12],
-  ['제주굿모닝대리점 해피점','A62257170000000','천지빌라',11],
-  ['제주굿모닝대리점 해피점','A62259490000000','다울하우스',71],
-  ['제주굿모닝대리점 해피점','A62259770000000','장원주택',14],
-  ['제주굿모닝대리점 해피점','A70058030000000','재영윈저캐슬아파트',63],
-  ['제주굿모닝대리점 해피점','A70153870000000','폴라리스빌',16],
-  ['제주굿모닝대리점 해피점','A70417240000000','N/A',17],
-  ['제주굿모닝대리점 해피점','A80279310000000','수목썬빌1차',20],
-  ['제주굿모닝대리점 해피점','D43156360000000','모던테라스',95],
-  ['제주굿모닝대리점 해피점','D43156820000000','골든빌',19],
-  ['제주굿모닝대리점 해피점','E16306500000000','송우수자인아파트',100],
-  ['제주굿모닝대리점 해피점','T50110122001286','타워30',48],
-  ['제주굿모닝대리점 해피점','T50110122001805','라온하우스',13],
-  ['제주굿모닝대리점 해피점','T50110122001898','에코루벤',192],
-  ['제주굿모닝대리점 해피점','T50110122001927','경진아트빌',50],
-  ['제주굿모닝대리점 해피점','T50130320045921','노형이레빌2차',50],
-  ['제주굿모닝대리점 해피점','T50130320067018','아름아이빌4차',16],
-  ['제주굿모닝대리점 해피점','T50130320114628','퍼스트빌',48],
-  ['제주굿모닝대리점 해피점','T50130320140959','가온빌',11],
-  ['제주굿모닝대리점 해피점','T50130320189569','이호휴캐슬',50],
+// ===== 정적 데이터 =====
+const COMPLEXES = [
+  ['JS대리점','인제점','A10135580000000','용인아파트',48],
+  ['JS대리점','인제점','A10158220000000','신산미화아파트',50],
+  ['JS대리점','인제점','A10490530000000','현원아트빌',36],
+  ['JS대리점','인제점','A62237260000000','가나다주택',14],
+  ['JS대리점','인제점','A62237670000000','서반일도빌라',15],
+  ['JS대리점','인제점','A62237690000000','한사랑빌라',11],
+  ['JS대리점','인제점','A62238240000000','아산빌라',19],
+  ['JS대리점','인제점','A62238430000000','이화맨션',16],
+  ['JS대리점','인제점','A62238590000000','운학빌라',11],
+  ['JS대리점','인제점','A62240130000000','영보맨션',15],
+  ['JS대리점','인제점','D42998100000000','N/A',10],
+  ['JS대리점','인제점','D75377880000000','N/A',10],
+  ['JS대리점','인제점','T50110102004550','N/A',10],
+  ['스마일대리점','남녕점','A10169210000000','동남아파트',74],
+  ['스마일대리점','남녕점','A10181730000000','연동이화아파트',64],
+  ['스마일대리점','남녕점','A10220450000000','일품아파트',45],
+  ['스마일대리점','남녕점','A11013840000000','연동아파트',46],
+  ['스마일대리점','남녕점','A12281010000000','원화하이츠빌라',11],
+  ['스마일대리점','남녕점','A62251810000000','제주이화오피스텔',108],
+  ['스마일대리점','남녕점','A62252790000000','신아빌라',12],
+  ['스마일대리점','남녕점','A62253090000000','찬양주택',18],
+  ['스마일대리점','남녕점','A62254240000000','대성빌라트',15],
+  ['스마일대리점','남녕점','A62254590000000','미광빌',12],
+  ['스마일대리점','남녕점','A62257310000000','도두남양빌',19],
+  ['스마일대리점','남녕점','A62264130000000','동양빌라',18],
+  ['스마일대리점','남녕점','A62264270000000','삼미빌라',16],
+  ['스마일대리점','남녕점','A62264990000000','가나빌라',16],
+  ['스마일대리점','남녕점','A70058000000000','산세의아침',17],
+  ['스마일대리점','남녕점','A70296670000000','노꼬메하우스',25],
+  ['스마일대리점','남녕점','D62064190000000','엔알누리8차',16],
+  ['스마일대리점','남녕점','T50130320128918','N/A',28],
+  ['스마일대리점','동홍점','A10134310000000','일호2차아파트',45],
+  ['스마일대리점','동홍점','A10134320000000','주공아파트1차',310],
+  ['스마일대리점','동홍점','A10134360000000','주공아파트2차',302],
+  ['스마일대리점','동홍점','A10134460000000','주공아파트3차',400],
+  ['스마일대리점','동홍점','A10134530000000','주공아파트4차',320],
+  ['스마일대리점','동홍점','A10151440000000','세기아파트',170],
+  ['스마일대리점','동홍점','A10171940000000','세기2차아파트',45],
+  ['스마일대리점','동홍점','A10186310000000','한라빌라',20],
+  ['스마일대리점','동홍점','A10971220000000','남양맨숀아파트',40],
+  ['스마일대리점','동홍점','A10971230000000','충암아파트',10],
+  ['스마일대리점','동홍점','A10971240000000','충암뉴빌라6차',15],
+  ['스마일대리점','동홍점','A50041100000000','금강라이프빌2차',19],
+  ['스마일대리점','동홍점','A50078680000000','모다드림아파트',28],
+  ['스마일대리점','동홍점','A62268930000000','충암뉴빌라',16],
+  ['스마일대리점','동홍점','A62269910000000','남양주택',10],
+  ['스마일대리점','동홍점','A62269930000000','남양주택',28],
+  ['스마일대리점','동홍점','A62270020000000','보림주택',11],
+  ['스마일대리점','동홍점','D43532170000000','그레이빌',18],
+  ['스마일대리점','동홍점','D50191320000000','무지개원룸',19],
+  ['스마일대리점','동홍점','D55080550000000','진영원룸',12],
+  ['스마일대리점','동홍점','D55132330000000','N/A',14],
+  ['스마일대리점','동홍점','T50130320113717','노블레스',80],
+  ['스마일대리점','동홍점','T50130320443882','아름빌',16],
+  ['스마일대리점','동홍점','T50130321172549','예서두레라움2단지',64],
+  ['스마일대리점','삼화점','A11924560000000','미듬하나로맨션',14],
+  ['스마일대리점','삼화점','T50130320091912','삼화LH3단지',850],
+  ['스마일대리점','삼화점','T50130321139685','도련어울림',42],
+  ['스마일대리점','삼화점','T50130321154745','도련블루핀아파트',90],
+  ['스마일대리점','삼화점','T50130321225839','도련영도갤럭시타운2차',113],
+  ['제주E&T대리점','노형점','A11013830000001','세방아파트',56],
+  ['제주E&T대리점','노형점','A11013830000003','세방아파트',20],
+  ['제주E&T대리점','노형점','A11014920000000','지산11차위더스빌',14],
+  ['제주E&T대리점','노형점','A62254740000000','고사마루주택',19],
+  ['제주E&T대리점','노형점','A62254850000000','노형삼다연립주택',16],
+  ['제주E&T대리점','노형점','A62254910000000','정우빌라',11],
+  ['제주E&T대리점','노형점','A70058090000000','노형미듬아뜨리에',12],
+  ['제주E&T대리점','노형점','A70099840000000','스페이스3',12],
+  ['제주E&T대리점','노형점','D43164380000000','N/A',11],
+  ['제주E&T대리점','노형점','D43165600000000','N/A',11],
+  ['제주E&T대리점','노형점','E16312970000000','디아망',21],
+  ['제주E&T대리점','노형점','T50130320060455','다담빌리지',104],
+  ['제주E&T대리점','노형점','T50130320072682','해듬빌',12],
+  ['제주E&T대리점','노형점','T50130320099629','창신주택',12],
+  ['제주E&T대리점','노형점','T50130320195258','노형휴먼빌',40],
+  ['제주E&T대리점','노형점','T50130320203907','N/A',50],
+  ['제주E&T대리점','도남점','A10135280000000','아산5차아파트',28],
+  ['제주E&T대리점','도남점','A10163170000000','신일아파트',32],
+  ['제주E&T대리점','도남점','A10167380000000','대원맨션',20],
+  ['제주E&T대리점','도남점','A10217960000000','고덕쉐르빌',19],
+  ['제주E&T대리점','도남점','A10228000000000','덕진유니스아파트',18],
+  ['제주E&T대리점','도남점','A12021150000000','도남시영아파트',65],
+  ['제주E&T대리점','도남점','A12021170000000','성환아파트',189],
+  ['제주E&T대리점','도남점','A12021180000000','수선화아파트',95],
+  ['제주E&T대리점','도남점','A12021200000000','수선화아파트',49],
+  ['제주E&T대리점','도남점','A12573340000000','도남위더스빌',14],
+  ['제주E&T대리점','도남점','A62258010000000','효신빌라',18],
+  ['제주E&T대리점','도남점','A62258060000000','이세원룸',18],
+  ['제주E&T대리점','도남점','A62258070000000','도남원룸',10],
+  ['제주E&T대리점','도남점','A62258650000000','원빌라',11],
+  ['제주E&T대리점','도남점','A62258950000000','윤재연립',13],
+  ['제주E&T대리점','도남점','A62258970000000','청암연립',21],
+  ['제주E&T대리점','도남점','A70303340000000','화안빌',27],
+  ['제주E&T대리점','도남점','D43182230000000','N/A',10],
+  ['제주E&T대리점','도남점','E16293820000000','신화위더스빌29차',32],
+  ['제주E&T대리점','도남점','T50110129000850','JNC4차아파트',52],
+  ['제주E&T대리점','도남점','T50130320040105','재영샤르빌',21],
+  ['제주E&T대리점','도남점','T50130320097743','대동베르빌',24],
+  ['제주E&T대리점','삼화점','A10192000000000','한라하이츠빌',13],
+  ['제주E&T대리점','삼화점','A50014260000000','제주삼화휴먼시아1단지아파트',1364],
+  ['제주E&T대리점','삼화점','A62250020000000','무지개하우스',15],
+  ['제주E&T대리점','삼화점','A70008410000000','바다그린빌',20],
+  ['제주E&T대리점','삼화점','D43115980000000','N/A',11],
+  ['제주E&T대리점','삼화점','T50110114000456','삼우주택',10],
+  ['제주E&T대리점','삼화점','T50110114000754','N/A',10],
+  ['제주E&T대리점','삼화점','T50130320040392','네오하임A동',18],
+  ['제주E&T대리점','삼화점','T50130320230694','N/A',18],
+  ['제주E&T대리점','삼화점','T50130320994443','N/A',10],
+  ['제주E&T대리점','시청점','A11030370000000','대유맨션',19],
+  ['제주E&T대리점','시청점','A62240880000000','보성주택',12],
+  ['제주E&T대리점','시청점','A62242160000000','동훈빌라',12],
+  ['제주E&T대리점','시청점','D43030570000000','N/A',10],
+  ['제주E&T대리점','시청점','D62068010000000','N/A',12],
+  ['제주광양대리점','삼화점','T50130320219731','천마에코피아',44],
+  ['제주광양대리점','삼화점','T50130321238652','봉개뜨래별2차',29],
+  ['제주광양대리점','서부점','A50014240000004','제주고성휴먼시아아파트',208],
+  ['제주광양대리점','서부점','A50014240000008','제주고성휴먼시아아파트',48],
+  ['제주광양대리점','서부점','A62266430000000','상귀반석타운',48],
+  ['제주광양대리점','아라점','A62250850000000','푸른원룸',12],
+  ['제주광양대리점','아라점','A70056740000000','이도나이스빌',16],
+  ['제주광양대리점','아라점','A80277630000000','노블리츠빌',40],
+  ['제주광양대리점','아라점','E16288990000000','아라마루',60],
+  ['제주광양대리점','아라점','T50130320087118','장안미르빌',30],
+  ['제주광양대리점','아라점','T50130320162494','아라마루N',60],
+  ['제주광양대리점','아라점','T50130320250824','아라휴안8차',24],
+  ['제주광양대리점','아라점','T50130320310426','N/A',10],
+  ['제주광양대리점','아라점','T50130321069385','아라루체빌2차',16],
+  ['제주굿모닝대리점','동우점','T50130321016881','벽강하이본타워8차',81],
+  ['제주굿모닝대리점','서문점','A10177080000000','청암용담연립',33],
+  ['제주굿모닝대리점','서문점','A10220660000000','한라아파트',49],
+  ['제주굿모닝대리점','서문점','A10451090000000','보성아파트',35],
+  ['제주굿모닝대리점','서문점','A11040440000000','세흥빌라',19],
+  ['제주굿모닝대리점','서문점','A40003210000000','진이빌',16],
+  ['제주굿모닝대리점','서문점','A62246320000000','동룡주택',48],
+  ['제주굿모닝대리점','서문점','A62246830000000','진영빌라',10],
+  ['제주굿모닝대리점','서문점','A62247100000000','상고지빌라',19],
+  ['제주굿모닝대리점','서문점','A62247140000000','삼보빌라',15],
+  ['제주굿모닝대리점','서문점','A62247170000000','제니스빌라',16],
+  ['제주굿모닝대리점','서문점','A70303420000000','광덕맨션',12],
+  ['제주굿모닝대리점','서문점','T50130320201974','용두암1차현대아파트',266],
+  ['제주굿모닝대리점','성산점','A10164830000000','고성진우파크빌',115],
+  ['제주굿모닝대리점','성산점','A11435670000000','동명아파트',79],
+  ['제주굿모닝대리점','성산점','T50130320802466','서귀포성산LH행복주택',346],
+  ['제주굿모닝대리점','연동점','A10464600000000','연동한양아트빌',15],
+  ['제주굿모닝대리점','연동점','A11898370000000','제동골든빌',18],
+  ['제주굿모닝대리점','연동점','A11898390000000','삼진빌라트',10],
+  ['제주굿모닝대리점','연동점','A62261450000000','쉐르빌',18],
+  ['제주굿모닝대리점','연동점','A70058340000000','민트하우스',43],
+  ['제주굿모닝대리점','연동점','A70153810000000','비산쉐르빌',16],
+  ['제주굿모닝대리점','연동점','D43206560000000','가나아파트',40],
+  ['제주굿모닝대리점','연동점','E16360990000000','연동중흥S-클래스',183],
+  ['제주굿모닝대리점','연동점','T50110137001412','미도스카이빌',120],
+  ['제주굿모닝대리점','연동점','T50130320088460','고운힐타운아파트I',80],
+  ['제주굿모닝대리점','이도점','A62250970000000','아라빌',12],
+  ['제주굿모닝대리점','이도점','A70056050000000','정원파인즈빌3차',16],
+  ['제주굿모닝대리점','이도점','D50174520000000','파크빌',16],
+  ['제주굿모닝대리점','이도점','E25298400000000','블루마운틴',16],
+  ['제주굿모닝대리점','이도점','T50130320117767','휴온스테이아라빌라',30],
+  ['제주굿모닝대리점','이도점','T50130320322033','화인퍼스트빌8차',100],
+  ['제주굿모닝대리점','이도점','T50130320997624','메종드파인13차',16],
+  ['제주굿모닝대리점','해피점','A10228660000000','재형파크빌',18],
+  ['제주굿모닝대리점','해피점','A11013850000000','영보아파트',16],
+  ['제주굿모닝대리점','해피점','A12639540000000','송우수자인아파트',26],
+  ['제주굿모닝대리점','해피점','A62251650000000','에이스텔',100],
+  ['제주굿모닝대리점','해피점','A62251660000000','이레하이텔',122],
+  ['제주굿모닝대리점','해피점','A62251680000000','메르헨하우스III',466],
+  ['제주굿모닝대리점','해피점','A62251970000000','서림빌라',16],
+  ['제주굿모닝대리점','해피점','A62251990000000','카리스빌',19],
+  ['제주굿모닝대리점','해피점','A62252170000000','대복빌라',14],
+  ['제주굿모닝대리점','해피점','A62252490000000','정한오피스텔',154],
+  ['제주굿모닝대리점','해피점','A62257010000000','창우빌라',22],
+  ['제주굿모닝대리점','해피점','A62257080000000','이호빌라',12],
+  ['제주굿모닝대리점','해피점','A62257150000000','남양주택',12],
+  ['제주굿모닝대리점','해피점','A62257170000000','천지빌라',11],
+  ['제주굿모닝대리점','해피점','A62259490000000','다울하우스',71],
+  ['제주굿모닝대리점','해피점','A62259770000000','장원주택',14],
+  ['제주굿모닝대리점','해피점','A70058030000000','재영윈저캐슬아파트',63],
+  ['제주굿모닝대리점','해피점','A70153870000000','폴라리스빌',16],
+  ['제주굿모닝대리점','해피점','A70417240000000','N/A',17],
+  ['제주굿모닝대리점','해피점','A80279310000000','수목썬빌1차',20],
+  ['제주굿모닝대리점','해피점','D43156360000000','모던테라스',95],
+  ['제주굿모닝대리점','해피점','D43156820000000','골든빌',19],
+  ['제주굿모닝대리점','해피점','E16306500000000','송우수자인아파트',100],
+  ['제주굿모닝대리점','해피점','T50110122001286','타워30',48],
+  ['제주굿모닝대리점','해피점','T50110122001805','라온하우스',13],
+  ['제주굿모닝대리점','해피점','T50110122001898','에코루벤',192],
+  ['제주굿모닝대리점','해피점','T50110122001927','경진아트빌',50],
+  ['제주굿모닝대리점','해피점','T50130320045921','노형이레빌2차',50],
+  ['제주굿모닝대리점','해피점','T50130320067018','아름아이빌4차',16],
+  ['제주굿모닝대리점','해피점','T50130320114628','퍼스트빌',48],
+  ['제주굿모닝대리점','해피점','T50130320140959','가온빌',11],
+  ['제주굿모닝대리점','해피점','T50130320189569','이호휴캐슬',50],
 ];
 
-// 대리점/매장 구조 생성
+// 대리점→매장 맵 생성
 const agencyMap = {};
-RAW_DATA.forEach(([store, code, name, cnt]) => {
-  const parts = store.split(' ');
-  const storeName = parts[parts.length - 1];
-  const agencyName = parts.slice(0, parts.length - 1).join(' ');
-  if (!agencyMap[agencyName]) agencyMap[agencyName] = {};
-  if (!agencyMap[agencyName][storeName]) agencyMap[agencyName][storeName] = [];
-  agencyMap[agencyName][storeName].push({ store, code, name, cnt });
+COMPLEXES.forEach(([ag, st]) => {
+  if (!agencyMap[ag]) agencyMap[ag] = new Set();
+  agencyMap[ag].add(st);
 });
 
-// ==================== 상태 ====================
-let selectedAgency = null;
-let selectedStore = null;
-let currentComplexes = [];
-let savedData = {}; // { code: { schedule, danggol, speed, tv } }
+// ===== 상태 =====
+let selAgency = null, selStore = null;
+let curList = []; // 현재 매장 단지 목록
+let dbData = {};  // { code: { schedule_date, danggol, speed, tv, memo, id } }
 
-// 달력 상태
-let calYear, calMonth, calSelectedDate, calTargetCode;
-
-// ==================== 화면 1: 대리점/매장 선택 ====================
+// ===== 화면1 초기화 =====
 function initScreen1() {
-  const agencyGrid = document.getElementById('agencyGrid');
-  agencyGrid.innerHTML = '';
-  Object.keys(agencyMap).sort().forEach(agency => {
-    const btn = document.createElement('button');
-    btn.className = 'select-btn';
-    btn.textContent = agency;
-    btn.onclick = () => selectAgency(agency, btn);
-    agencyGrid.appendChild(btn);
+  const ag = document.getElementById('agencyGrid');
+  ag.innerHTML = '';
+  Object.keys(agencyMap).sort().forEach(name => {
+    const b = document.createElement('button');
+    b.className = 'sel-btn';
+    b.textContent = name;
+    b.onclick = () => pickAgency(name, b);
+    ag.appendChild(b);
   });
 }
 
-function selectAgency(agency, btn) {
-  selectedAgency = agency;
-  selectedStore = null;
-  document.querySelectorAll('#agencyGrid .select-btn').forEach(b => b.classList.remove('active'));
+function pickAgency(name, btn) {
+  selAgency = name; selStore = null;
+  document.querySelectorAll('#agencyGrid .sel-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  
-  const storeCard = document.getElementById('storeCard');
-  const storeGrid = document.getElementById('storeGrid');
-  storeCard.style.display = 'block';
-  storeGrid.innerHTML = '';
-  
-  Object.keys(agencyMap[agency]).sort().forEach(store => {
-    const btn2 = document.createElement('button');
-    btn2.className = 'select-btn';
-    btn2.textContent = store;
-    btn2.onclick = () => selectStore(store, btn2);
-    storeGrid.appendChild(btn2);
+  const sg = document.getElementById('storeGrid');
+  sg.innerHTML = '';
+  [...agencyMap[name]].sort().forEach(st => {
+    const b = document.createElement('button');
+    b.className = 'sel-btn';
+    b.textContent = st;
+    b.onclick = () => pickStore(st, b);
+    sg.appendChild(b);
   });
-  
+  document.getElementById('storeCard').style.display = 'block';
   document.getElementById('proceedBtn').disabled = true;
 }
 
-function selectStore(store, btn) {
-  selectedStore = store;
-  document.querySelectorAll('#storeGrid .select-btn').forEach(b => b.classList.remove('active'));
+function pickStore(name, btn) {
+  selStore = name;
+  document.querySelectorAll('#storeGrid .sel-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('proceedBtn').disabled = false;
 }
 
 async function goToScreen2() {
-  if (!selectedAgency || !selectedStore) return;
-  
-  const fullStoreName = selectedAgency + ' ' + selectedStore;
-  currentComplexes = agencyMap[selectedAgency][selectedStore];
-  
+  if (!selAgency || !selStore) return;
+  curList = COMPLEXES.filter(r => r[0] === selAgency && r[1] === selStore);
   document.getElementById('screen1').classList.remove('active');
   document.getElementById('screen2').classList.add('active');
   document.getElementById('backBtn').style.display = 'block';
-  document.getElementById('headerTitle').textContent = fullStoreName;
-  document.getElementById('selectedInfo').textContent = 
-    `📍 ${selectedAgency} > ${selectedStore} | 총 ${currentComplexes.length}개 단지`;
-  
-  // DB에서 기존 데이터 로드
-  await loadSavedData(fullStoreName);
+  document.getElementById('headerTitle').textContent = `${selAgency} ${selStore}`;
+  document.getElementById('selInfo').textContent =
+    `📍 ${selAgency} > ${selStore}  |  총 ${curList.length}개 단지`;
+  document.getElementById('searchBox').value = '';
+  showLoading();
+  await loadDB();
   renderTable();
   renderStats();
 }
@@ -716,165 +723,137 @@ function goBack() {
   document.getElementById('screen1').classList.add('active');
   document.getElementById('backBtn').style.display = 'none';
   document.getElementById('headerTitle').textContent = '📡 침투율 저조 단지 영업관리';
-  document.getElementById('searchBox').value = '';
 }
 
-// ==================== DB 연동 ====================
-async function ensureTable() {
-  // 테이블이 없으면 자동 생성 시도 (Supabase에서는 SQL로 미리 생성 필요)
-  // 여기서는 upsert로 처리
-}
-
-async function loadSavedData(storeName) {
-  savedData = {};
+// ===== DB 로드 =====
+async function loadDB() {
+  dbData = {};
+  const storeName = selAgency + ' ' + selStore;
   try {
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from('sales_records')
       .select('*')
       .eq('store_name', storeName);
-    
-    if (error) {
-      if (error.code === '42P01') {
-        // 테이블 없음 - 무시하고 빈 데이터로 진행
-        console.warn('테이블이 없습니다. Supabase에서 테이블을 생성해주세요.');
-        showToast('⚠️ DB 테이블을 먼저 생성해주세요', 'error');
-      }
-      return;
-    }
-    
-    if (data) {
-      data.forEach(row => {
-        savedData[row.building_code] = {
-          schedule: row.schedule_date,
-          danggol: row.danggol,
-          speed: row.speed,
-          tv: row.tv,
-          id: row.id
-        };
-      });
-    }
+    if (error) throw error;
+    (data || []).forEach(r => {
+      dbData[r.building_code] = {
+        schedule_date: r.schedule_date || '',
+        danggol: r.danggol ?? '',
+        speed: r.speed ?? '',
+        tv: r.tv ?? '',
+        memo: r.memo || '',
+        id: r.id
+      };
+    });
   } catch(e) {
-    console.error('데이터 로드 오류:', e);
+    showToast('⚠️ 데이터 로드 실패: ' + e.message, 'err');
   }
 }
 
-async function saveRecord(code) {
-  const fullStoreName = selectedAgency + ' ' + selectedStore;
-  const complex = currentComplexes.find(c => c.code === code);
-  if (!complex) return;
+// ===== 저장 =====
+async function saveRow(code) {
+  const storeName = selAgency + ' ' + selStore;
+  const item = curList.find(r => r[2] === code);
+  if (!item) return;
 
-  const scheduleVal = document.getElementById(`sch_${code}`)?.dataset.date || null;
-  const danggolVal = parseInt(document.getElementById(`dg_${code}`)?.value) || 0;
-  const speedVal = parseInt(document.getElementById(`sp_${code}`)?.value) || 0;
-  const tvVal = parseInt(document.getElementById(`tv_${code}`)?.value) || 0;
+  const schBtn = document.getElementById('sch_' + code);
+  const scheduleDate = schBtn?.dataset.date || null;
+  const danggol = parseInt(document.getElementById('dg_' + code)?.value) || 0;
+  const speed   = parseInt(document.getElementById('sp_' + code)?.value) || 0;
+  const tv      = parseInt(document.getElementById('tv_' + code)?.value) || 0;
+  const memo    = dbData[code]?.memo || '';
 
-  const saveBtn = document.getElementById(`savebtn_${code}`);
-  if (saveBtn) { saveBtn.classList.add('saving'); saveBtn.textContent = '저장중...'; }
+  const btn = document.getElementById('sbtn_' + code);
+  if (btn) { btn.classList.add('saving'); btn.textContent = '저장중...'; }
 
   try {
-    const record = {
-      store_name: fullStoreName,
-      agency_name: selectedAgency,
-      store_short: selectedStore,
+    const rec = {
+      store_name: storeName,
+      agency_name: selAgency,
+      store_short: selStore,
       building_code: code,
-      building_name: complex.name,
-      household_count: complex.cnt,
-      schedule_date: scheduleVal,
-      danggol: danggolVal,
-      speed: speedVal,
-      tv: tvVal,
+      building_name: item[3],
+      household_count: item[4],
+      schedule_date: scheduleDate,
+      danggol, speed, tv, memo,
       updated_at: new Date().toISOString()
     };
-
-    const { data, error } = await supabase
+    const { error } = await sb
       .from('sales_records')
-      .upsert(record, { onConflict: 'store_name,building_code' })
-      .select();
-
+      .upsert(rec, { onConflict: 'store_name,building_code' });
     if (error) throw error;
 
-    savedData[code] = { schedule: scheduleVal, danggol: danggolVal, speed: speedVal, tv: tvVal };
-    
-    // 행 하이라이트
-    const row = document.getElementById(`row_${code}`);
-    if (row) row.classList.add('saved');
-    
-    if (saveBtn) {
-      saveBtn.textContent = '✓ 저장됨';
-      saveBtn.style.background = '#1a73e8';
-      setTimeout(() => {
-        if (saveBtn) { saveBtn.textContent = '저장'; saveBtn.style.background = '#34a853'; saveBtn.classList.remove('saving'); }
-      }, 2000);
-    }
-    
-    showToast(`✅ ${complex.name} 저장 완료!`, 'success');
+    dbData[code] = { schedule_date: scheduleDate, danggol, speed, tv, memo };
+    const row = document.getElementById('row_' + code);
+    if (row) row.classList.add('row-saved');
+    showToast('✅ ' + item[3] + ' 저장 완료!', 'ok');
     renderStats();
-    
+    if (btn) { btn.textContent = '수정'; btn.classList.remove('saving'); }
   } catch(e) {
-    console.error('저장 오류:', e);
-    showToast(`❌ 저장 실패: ${e.message}`, 'error');
-    if (saveBtn) { saveBtn.classList.remove('saving'); saveBtn.textContent = '저장'; }
+    showToast('❌ 저장 실패: ' + e.message, 'err');
+    if (btn) { btn.textContent = '저장'; btn.classList.remove('saving'); }
   }
 }
 
-// ==================== 테이블 렌더링 ====================
+// ===== 테이블 렌더링 =====
+function showLoading() {
+  document.getElementById('tbody').innerHTML =
+    `<tr class="loading-row"><td colspan="8"><div class="spinner"></div>데이터 불러오는 중...</td></tr>`;
+}
+
 function renderTable(filter = '') {
-  const tbody = document.getElementById('complexTbody');
+  const tbody = document.getElementById('tbody');
   tbody.innerHTML = '';
-  
-  const filtered = filter 
-    ? currentComplexes.filter(c => c.name.includes(filter) || c.code.includes(filter))
-    : currentComplexes;
-  
-  if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#999;">검색 결과가 없습니다</td></tr>';
+  const list = filter
+    ? curList.filter(r => r[3].includes(filter) || r[2].includes(filter))
+    : curList;
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:28px;color:#aaa;">검색 결과 없음</td></tr>`;
     return;
   }
 
-  filtered.forEach(({ code, name, cnt }) => {
-    const saved = savedData[code] || {};
-    const hasSaved = !!saved.schedule || saved.danggol || saved.speed || saved.tv;
-    
+  list.forEach(([ag, st, code, name, cnt]) => {
+    const d = dbData[code] || {};
+    const hasSaved = d.schedule_date || d.danggol || d.speed || d.tv || d.memo;
+    const hasMemo = !!d.memo;
     const tr = document.createElement('tr');
-    tr.id = `row_${code}`;
-    if (hasSaved) tr.classList.add('saved');
-    
-    const scheduleDate = saved.schedule || '';
-    const danggol = saved.danggol || '';
-    const speed = saved.speed || '';
-    const tv = saved.tv || '';
-    
+    tr.id = 'row_' + code;
+    if (hasSaved) tr.classList.add('row-saved');
+
     tr.innerHTML = `
       <td>
-        <div class="building-name">${name === 'N/A' ? '(미확인)' : name}</div>
-        <div class="building-code">${code}</div>
+        <div class="bld-name">${name === 'N/A' ? '(미확인)' : name}</div>
+        <div class="bld-code">${code}</div>
       </td>
-      <td class="household">${cnt}</td>
+      <td class="hh-count">${cnt}</td>
       <td style="text-align:center;">
-        <button class="date-btn ${scheduleDate ? 'has-date' : ''}" 
-          id="sch_${code}" 
-          data-date="${scheduleDate}"
-          onclick="openCalendar('${code}')">
-          ${scheduleDate ? formatDateDisplay(scheduleDate) : '📅 날짜선택'}
+        <button class="date-btn ${d.schedule_date ? 'has-date' : ''}"
+          id="sch_${code}" data-date="${d.schedule_date || ''}"
+          onclick="openCal('${code}')">
+          ${d.schedule_date ? '📅 ' + fmtDisp(d.schedule_date) : '📅 날짜선택'}
         </button>
       </td>
       <td style="text-align:center;">
-        <input type="number" class="result-input" id="dg_${code}" 
-          value="${danggol}" min="0" placeholder="0"
-          onchange="markChanged('${code}')">
+        <input class="num-input" type="number" id="dg_${code}"
+          value="${d.danggol ?? ''}" min="0" placeholder="0">
       </td>
       <td style="text-align:center;">
-        <input type="number" class="result-input" id="sp_${code}" 
-          value="${speed}" min="0" placeholder="0"
-          onchange="markChanged('${code}')">
+        <input class="num-input" type="number" id="sp_${code}"
+          value="${d.speed ?? ''}" min="0" placeholder="0">
       </td>
       <td style="text-align:center;">
-        <input type="number" class="result-input" id="tv_${code}" 
-          value="${tv}" min="0" placeholder="0"
-          onchange="markChanged('${code}')">
+        <input class="num-input" type="number" id="tv_${code}"
+          value="${d.tv ?? ''}" min="0" placeholder="0">
       </td>
       <td style="text-align:center;">
-        <button class="save-btn" id="savebtn_${code}" onclick="saveRecord('${code}')">
+        <button class="memo-btn ${hasMemo ? 'has-memo' : ''}"
+          id="mbtn_${code}" onclick="openMemo('${code}')">
+          ${hasMemo ? '📝 있음' : '📝 메모'}
+        </button>
+      </td>
+      <td style="text-align:center;">
+        <button class="save-btn" id="sbtn_${code}" onclick="saveRow('${code}')">
           ${hasSaved ? '수정' : '저장'}
         </button>
       </td>
@@ -883,198 +862,193 @@ function renderTable(filter = '') {
   });
 }
 
-function markChanged(code) {
-  const btn = document.getElementById(`savebtn_${code}`);
-  if (btn) { btn.textContent = '저장'; btn.style.background = '#34a853'; }
-}
-
 function filterTable() {
-  const val = document.getElementById('searchBox').value.trim();
-  renderTable(val);
+  renderTable(document.getElementById('searchBox').value.trim());
 }
 
-// ==================== 통계 ====================
+// ===== 통계 =====
 function renderStats() {
-  const total = currentComplexes.length;
-  const savedCount = Object.keys(savedData).filter(k => 
-    currentComplexes.some(c => c.code === k)
-  ).length;
-  const totalDanggol = Object.values(savedData).reduce((s, d) => s + (d.danggol || 0), 0);
-  const totalSpeed = Object.values(savedData).reduce((s, d) => s + (d.speed || 0), 0);
-  const totalTv = Object.values(savedData).reduce((s, d) => s + (d.tv || 0), 0);
-  
+  const codes = curList.map(r => r[2]);
+  const saved = codes.filter(c => {
+    const d = dbData[c];
+    return d && (d.schedule_date || d.danggol || d.speed || d.tv);
+  }).length;
+  const dg = codes.reduce((s, c) => s + (parseInt(dbData[c]?.danggol) || 0), 0);
+  const sp = codes.reduce((s, c) => s + (parseInt(dbData[c]?.speed) || 0), 0);
+  const tv = codes.reduce((s, c) => s + (parseInt(dbData[c]?.tv) || 0), 0);
   document.getElementById('statsBar').innerHTML = `
-    <div class="stat-item">
-      <div class="stat-val">${savedCount}/${total}</div>
-      <div class="stat-label">입력 단지</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val" style="color:#ea4335;">${totalDanggol}</div>
-      <div class="stat-label">단골 합계</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val" style="color:#34a853;">${totalSpeed}</div>
-      <div class="stat-label">초고속 합계</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val" style="color:#f57c00;">${totalTv}</div>
-      <div class="stat-label">TV 합계</div>
-    </div>
+    <div class="stat-item"><div class="stat-val">${saved}/${curList.length}</div><div class="stat-label">입력 단지</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:#ea4335;">${dg}</div><div class="stat-label">단골 합계</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:#34a853;">${sp}</div><div class="stat-label">초고속 합계</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:#f57c00;">${tv}</div><div class="stat-label">TV 합계</div></div>
   `;
 }
 
-// ==================== 달력 ====================
-function openCalendar(code) {
-  calTargetCode = code;
-  const btn = document.getElementById(`sch_${code}`);
-  const existingDate = btn?.dataset.date;
-  
-  const today = new Date();
-  if (existingDate) {
-    const d = new Date(existingDate);
-    calYear = d.getFullYear();
-    calMonth = d.getMonth();
-    calSelectedDate = existingDate;
-  } else {
-    calYear = today.getFullYear();
-    calMonth = today.getMonth();
-    calSelectedDate = null;
-  }
-  
-  renderCalendar();
-  document.getElementById('calendarOverlay').classList.add('show');
+// ===== 달력 =====
+let calCode = null, calY, calM, calSel;
+
+function openCal(code) {
+  calCode = code;
+  const btn = document.getElementById('sch_' + code);
+  const ex = btn?.dataset.date;
+  const now = new Date();
+  if (ex) { const d = new Date(ex); calY = d.getFullYear(); calM = d.getMonth(); calSel = ex; }
+  else { calY = now.getFullYear(); calM = now.getMonth(); calSel = null; }
+  drawCal();
+  document.getElementById('calOverlay').classList.add('show');
 }
 
-function closeCalendar() {
-  document.getElementById('calendarOverlay').classList.remove('show');
-  calTargetCode = null;
-  calSelectedDate = null;
+function closeCal() {
+  document.getElementById('calOverlay').classList.remove('show');
+  calCode = null; calSel = null;
 }
 
-function closeCalendarOnOverlay(e) {
-  if (e.target === document.getElementById('calendarOverlay')) closeCalendar();
+function calOverlayClick(e) {
+  if (e.target === document.getElementById('calOverlay')) closeCal();
 }
 
-function changeMonth(delta) {
-  calMonth += delta;
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth < 0) { calMonth = 11; calYear--; }
-  renderCalendar();
-}
+function calMove(d) { calM += d; if (calM > 11) { calM = 0; calY++; } if (calM < 0) { calM = 11; calY--; } drawCal(); }
 
-function renderCalendar() {
-  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  document.getElementById('calTitle').textContent = `${calYear}년 ${months[calMonth]}`;
-  
-  const grid = document.getElementById('calGrid');
-  grid.innerHTML = '';
-  
-  // 요일 헤더
+function drawCal() {
+  const MN = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('calTitle').textContent = `${calY}년 ${MN[calM]}`;
+  const g = document.getElementById('calGrid');
+  g.innerHTML = '';
   ['일','월','화','수','목','금','토'].forEach((d, i) => {
     const el = document.createElement('div');
-    el.className = 'cal-day-header';
+    el.className = 'cal-dh';
     el.textContent = d;
-    grid.appendChild(el);
+    g.appendChild(el);
   });
-  
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-  const today = new Date();
-  const todayStr = formatDate(today.getFullYear(), today.getMonth(), today.getDate());
-  
-  // 빈 칸
-  for (let i = 0; i < firstDay; i++) {
-    const el = document.createElement('div');
-    el.className = 'cal-day empty';
-    grid.appendChild(el);
+  const first = new Date(calY, calM, 1).getDay();
+  const days = new Date(calY, calM + 1, 0).getDate();
+  const todayStr = fmtDate(new Date());
+  for (let i = 0; i < first; i++) {
+    const el = document.createElement('div'); el.className = 'cal-d empty'; g.appendChild(el);
   }
-  
-  // 날짜
-  for (let d = 1; d <= daysInMonth; d++) {
+  for (let d = 1; d <= days; d++) {
+    const ds = `${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dow = new Date(calY, calM, d).getDay();
     const el = document.createElement('div');
-    const dateStr = formatDate(calYear, calMonth, d);
-    const dayOfWeek = new Date(calYear, calMonth, d).getDay();
-    
-    let cls = 'cal-day';
-    if (dayOfWeek === 0) cls += ' sunday';
-    if (dayOfWeek === 6) cls += ' saturday';
-    if (dateStr === todayStr) cls += ' today';
-    if (dateStr === calSelectedDate) cls += ' selected';
-    
+    let cls = 'cal-d';
+    if (dow === 0) cls += ' sun';
+    if (dow === 6) cls += ' sat';
+    if (ds === todayStr) cls += ' today';
+    if (ds === calSel) cls += ' sel';
     el.className = cls;
     el.textContent = d;
-    el.onclick = () => selectCalDay(dateStr, el);
-    grid.appendChild(el);
+    el.onclick = () => {
+      calSel = ds;
+      document.querySelectorAll('.cal-d.sel').forEach(e => e.classList.remove('sel'));
+      el.classList.add('sel');
+    };
+    g.appendChild(el);
   }
 }
 
-function selectCalDay(dateStr, el) {
-  calSelectedDate = dateStr;
-  document.querySelectorAll('.cal-day.selected').forEach(e => e.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
-function confirmDate() {
-  if (!calSelectedDate || !calTargetCode) { closeCalendar(); return; }
-  
-  const btn = document.getElementById(`sch_${calTargetCode}`);
+function confirmCal() {
+  if (!calSel || !calCode) { closeCal(); return; }
+  const btn = document.getElementById('sch_' + calCode);
   if (btn) {
-    btn.dataset.date = calSelectedDate;
-    btn.textContent = formatDateDisplay(calSelectedDate);
+    btn.dataset.date = calSel;
+    btn.textContent = '📅 ' + fmtDisp(calSel);
     btn.classList.add('has-date');
-    markChanged(calTargetCode);
   }
-  closeCalendar();
+  closeCal();
 }
 
-function formatDate(y, m, d) {
-  return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+function fmtDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtDisp(s) {
+  if (!s) return '';
+  const [y, m, d] = s.split('-');
+  return `${m}/${d}`;
 }
 
-function formatDateDisplay(dateStr) {
-  if (!dateStr) return '📅 날짜선택';
-  const [y, m, d] = dateStr.split('-');
-  return `📅 ${m}/${d}`;
+// ===== 메모 =====
+let memoCode = null;
+
+function openMemo(code) {
+  memoCode = code;
+  const item = curList.find(r => r[2] === code);
+  const name = item ? (item[3] === 'N/A' ? '(미확인)' : item[3]) : code;
+  document.getElementById('memoTitle').textContent = '📝 ' + name;
+  document.getElementById('memoSub').textContent = code;
+  const txt = dbData[code]?.memo || '';
+  document.getElementById('memoText').value = txt;
+  document.getElementById('memoChar').textContent = txt.length;
+  document.getElementById('memoOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('memoText').focus(), 100);
 }
 
-// ==================== 토스트 ====================
+function closeMemo() {
+  document.getElementById('memoOverlay').classList.remove('show');
+  memoCode = null;
+}
+
+function memoOverlayClick(e) {
+  if (e.target === document.getElementById('memoOverlay')) closeMemo();
+}
+
+function updateMemoChar() {
+  document.getElementById('memoChar').textContent = document.getElementById('memoText').value.length;
+}
+
+async function saveMemo() {
+  if (!memoCode) return;
+  const memo = document.getElementById('memoText').value.trim();
+  const storeName = selAgency + ' ' + selStore;
+  const item = curList.find(r => r[2] === memoCode);
+
+  try {
+    const rec = {
+      store_name: storeName,
+      agency_name: selAgency,
+      store_short: selStore,
+      building_code: memoCode,
+      building_name: item ? item[3] : '',
+      household_count: item ? item[4] : 0,
+      schedule_date: dbData[memoCode]?.schedule_date || null,
+      danggol: parseInt(document.getElementById('dg_' + memoCode)?.value) || 0,
+      speed:   parseInt(document.getElementById('sp_' + memoCode)?.value) || 0,
+      tv:      parseInt(document.getElementById('tv_' + memoCode)?.value) || 0,
+      memo,
+      updated_at: new Date().toISOString()
+    };
+    const { error } = await sb
+      .from('sales_records')
+      .upsert(rec, { onConflict: 'store_name,building_code' });
+    if (error) throw error;
+
+    if (!dbData[memoCode]) dbData[memoCode] = {};
+    dbData[memoCode].memo = memo;
+
+    // 메모 버튼 업데이트
+    const mbtn = document.getElementById('mbtn_' + memoCode);
+    if (mbtn) {
+      if (memo) { mbtn.classList.add('has-memo'); mbtn.textContent = '📝 있음'; }
+      else { mbtn.classList.remove('has-memo'); mbtn.textContent = '📝 메모'; }
+    }
+    showToast('✅ 메모 저장 완료!', 'ok');
+    closeMemo();
+  } catch(e) {
+    showToast('❌ 메모 저장 실패: ' + e.message, 'err');
+  }
+}
+
+// ===== 토스트 =====
+let toastTimer;
 function showToast(msg, type = '') {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className = `toast ${type} show`;
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ==================== 초기화 ====================
+// ===== 시작 =====
 initScreen1();
 </script>
-
-<!-- Supabase 테이블 생성 안내 (최초 1회) -->
-<script>
-// Supabase에서 아래 SQL을 실행하여 테이블을 생성하세요:
-/*
-CREATE TABLE IF NOT EXISTS sales_records (
-  id BIGSERIAL PRIMARY KEY,
-  store_name TEXT NOT NULL,
-  agency_name TEXT,
-  store_short TEXT,
-  building_code TEXT NOT NULL,
-  building_name TEXT,
-  household_count INTEGER,
-  schedule_date DATE,
-  danggol INTEGER DEFAULT 0,
-  speed INTEGER DEFAULT 0,
-  tv INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(store_name, building_code)
-);
-
--- RLS 정책 (개발용 - 모든 접근 허용)
-ALTER TABLE sales_records ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow all" ON sales_records FOR ALL USING (true) WITH CHECK (true);
-*/
-</script>
-
 </body>
 </html>
