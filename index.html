@@ -173,7 +173,6 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
 }
 .num-input:focus { outline: none; border-color: #1a73e8; }
 
-/* 메모 버튼 */
 .memo-btn {
   padding: 5px 8px;
   border: 1.5px solid #f57c00;
@@ -207,7 +206,6 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
 .save-btn:hover { opacity: 0.82; }
 .save-btn.saving { opacity: 0.55; cursor: not-allowed; }
 
-/* 달력 오버레이 */
 .overlay {
   display: none;
   position: fixed;
@@ -282,7 +280,6 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
 }
 .cal-confirm:hover { opacity: 0.88; }
 
-/* 메모 팝업 */
 .memo-popup {
   background: white;
   border-radius: 16px;
@@ -320,7 +317,6 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
 }
 .memo-save:hover { opacity: 0.88; }
 
-/* 토스트 */
 .toast {
   position: fixed;
   bottom: 22px;
@@ -341,7 +337,6 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
 .toast.ok { background: #34a853; }
 .toast.err { background: #ea4335; }
 
-/* 로딩 */
 .loading-row td {
   text-align: center;
   padding: 30px;
@@ -375,7 +370,6 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
   <h1 id="headerTitle">📡 침투율 저조 단지 영업관리</h1>
 </div>
 
-<!-- 화면1: 대리점/매장 선택 -->
 <div class="screen active" id="screen1">
   <div class="card">
     <h2>🏢 대리점 선택</h2>
@@ -390,7 +384,6 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
   </button>
 </div>
 
-<!-- 화면2: 단지 입력 -->
 <div class="screen" id="screen2">
   <div class="selected-info" id="selInfo"></div>
   <div class="stats-bar" id="statsBar"></div>
@@ -403,9 +396,9 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
             <th style="text-align:left;">건물명</th>
             <th>세대수</th>
             <th>영업일정</th>
-            <th>단골</th>
-            <th>초고속</th>
-            <th>TV</th>
+            <th>내방고객</th>   <!-- ✅ 단골 → 내방고객 -->
+            <th>필름교체</th>   <!-- ✅ 초고속 → 필름교체 -->
+            <th>우양산</th>     <!-- ✅ TV → 우양산 -->
             <th>메모</th>
             <th>저장</th>
           </tr>
@@ -416,7 +409,6 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
   </div>
 </div>
 
-<!-- 달력 오버레이 -->
 <div class="overlay" id="calOverlay" onclick="calOverlayClick(event)">
   <div class="cal-popup">
     <div class="cal-head">
@@ -432,7 +424,6 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
   </div>
 </div>
 
-<!-- 메모 오버레이 -->
 <div class="overlay" id="memoOverlay" onclick="memoOverlayClick(event)">
   <div class="memo-popup">
     <h3 id="memoTitle">메모</h3>
@@ -446,18 +437,15 @@ body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f0f4f8; colo
   </div>
 </div>
 
-<!-- 토스트 -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== Supabase =====
 const { createClient } = supabase;
 const sb = createClient(
   'https://nevivoegbvjcerqfqxdm.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldml2b2VnYnZqY2VycWZxeGRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxODY1OTEsImV4cCI6MjA5MTc2MjU5MX0._jbIaQpXko1JAZue8fyFGveFVD7gLDkCmz0EhJOIrvM'
 );
 
-// ===== 정적 데이터 =====
 const COMPLEXES = [
   ['JS대리점','인제점','A10135580000000','용인아파트',48],
   ['JS대리점','인제점','A10158220000000','신산미화아파트',50],
@@ -653,19 +641,16 @@ const COMPLEXES = [
   ['제주굿모닝대리점','해피점','T50130320189569','이호휴캐슬',50],
 ];
 
-// 대리점→매장 맵 생성
 const agencyMap = {};
 COMPLEXES.forEach(([ag, st]) => {
   if (!agencyMap[ag]) agencyMap[ag] = new Set();
   agencyMap[ag].add(st);
 });
 
-// ===== 상태 =====
 let selAgency = null, selStore = null;
-let curList = []; // 현재 매장 단지 목록
-let dbData = {};  // { code: { schedule_date, danggol, speed, tv, memo, id } }
+let curList = [];
+let dbData = {};
 
-// ===== 화면1 초기화 =====
 function initScreen1() {
   const ag = document.getElementById('agencyGrid');
   ag.innerHTML = '';
@@ -725,7 +710,6 @@ function goBack() {
   document.getElementById('headerTitle').textContent = '📡 침투율 저조 단지 영업관리';
 }
 
-// ===== DB 로드 =====
 async function loadDB() {
   dbData = {};
   const storeName = selAgency + ' ' + selStore;
@@ -750,7 +734,6 @@ async function loadDB() {
   }
 }
 
-// ===== 저장 =====
 async function saveRow(code) {
   const storeName = selAgency + ' ' + selStore;
   const item = curList.find(r => r[2] === code);
@@ -795,7 +778,6 @@ async function saveRow(code) {
   }
 }
 
-// ===== 테이블 렌더링 =====
 function showLoading() {
   document.getElementById('tbody').innerHTML =
     `<tr class="loading-row"><td colspan="8"><div class="spinner"></div>데이터 불러오는 중...</td></tr>`;
@@ -866,7 +848,6 @@ function filterTable() {
   renderTable(document.getElementById('searchBox').value.trim());
 }
 
-// ===== 통계 =====
 function renderStats() {
   const codes = curList.map(r => r[2]);
   const saved = codes.filter(c => {
@@ -877,14 +858,25 @@ function renderStats() {
   const sp = codes.reduce((s, c) => s + (parseInt(dbData[c]?.speed) || 0), 0);
   const tv = codes.reduce((s, c) => s + (parseInt(dbData[c]?.tv) || 0), 0);
   document.getElementById('statsBar').innerHTML = `
-    <div class="stat-item"><div class="stat-val">${saved}/${curList.length}</div><div class="stat-label">입력 단지</div></div>
-    <div class="stat-item"><div class="stat-val" style="color:#ea4335;">${dg}</div><div class="stat-label">단골 합계</div></div>
-    <div class="stat-item"><div class="stat-val" style="color:#34a853;">${sp}</div><div class="stat-label">초고속 합계</div></div>
-    <div class="stat-item"><div class="stat-val" style="color:#f57c00;">${tv}</div><div class="stat-label">TV 합계</div></div>
+    <div class="stat-item">
+      <div class="stat-val">${saved}/${curList.length}</div>
+      <div class="stat-label">입력 단지</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" style="color:#ea4335;">${dg}</div>
+      <div class="stat-label">내방고객 합계</div>  <!-- ✅ 변경 -->
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" style="color:#34a853;">${sp}</div>
+      <div class="stat-label">필름교체 합계</div>  <!-- ✅ 변경 -->
+    </div>
+    <div class="stat-item">
+      <div class="stat-val" style="color:#f57c00;">${tv}</div>
+      <div class="stat-label">우양산 합계</div>    <!-- ✅ 변경 -->
+    </div>
   `;
 }
 
-// ===== 달력 =====
 let calCode = null, calY, calM, calSel;
 
 function openCal(code) {
@@ -907,14 +899,19 @@ function calOverlayClick(e) {
   if (e.target === document.getElementById('calOverlay')) closeCal();
 }
 
-function calMove(d) { calM += d; if (calM > 11) { calM = 0; calY++; } if (calM < 0) { calM = 11; calY--; } drawCal(); }
+function calMove(d) {
+  calM += d;
+  if (calM > 11) { calM = 0; calY++; }
+  if (calM < 0) { calM = 11; calY--; }
+  drawCal();
+}
 
 function drawCal() {
   const MN = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   document.getElementById('calTitle').textContent = `${calY}년 ${MN[calM]}`;
   const g = document.getElementById('calGrid');
   g.innerHTML = '';
-  ['일','월','화','수','목','금','토'].forEach((d, i) => {
+  ['일','월','화','수','목','금','토'].forEach(d => {
     const el = document.createElement('div');
     el.className = 'cal-dh';
     el.textContent = d;
@@ -966,7 +963,6 @@ function fmtDisp(s) {
   return `${m}/${d}`;
 }
 
-// ===== 메모 =====
 let memoCode = null;
 
 function openMemo(code) {
@@ -1024,7 +1020,6 @@ async function saveMemo() {
     if (!dbData[memoCode]) dbData[memoCode] = {};
     dbData[memoCode].memo = memo;
 
-    // 메모 버튼 업데이트
     const mbtn = document.getElementById('mbtn_' + memoCode);
     if (mbtn) {
       if (memo) { mbtn.classList.add('has-memo'); mbtn.textContent = '📝 있음'; }
@@ -1037,7 +1032,6 @@ async function saveMemo() {
   }
 }
 
-// ===== 토스트 =====
 let toastTimer;
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
@@ -1047,7 +1041,6 @@ function showToast(msg, type = '') {
   toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ===== 시작 =====
 initScreen1();
 </script>
 </body>
